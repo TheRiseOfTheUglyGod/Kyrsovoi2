@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" alignment="CENTER">
+    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+    <Label text="%label.suppliers" style="-fx-font-size: 16;"/>
+
+    <TableView fx:id="suppliersTable" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="colId" text="%col.id" prefWidth="50"/>
+            <TableColumn fx:id="colName" text="%col.name" prefWidth="200"/>
+            <TableColumn fx:id="colContact" text="%col.contact" prefWidth="150"/>
+            <TableColumn fx:id="colPhone" text="%col.phone" prefWidth="120"/>
+            <TableColumn fx:id="colEmail" text="%col.email" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="%button.add" onAction="#addSupplier"/>
+        <Button text="%button.edit" onAction="#editSupplier"/>
+        <Button text="%button.delete" onAction="#deleteSupplier"/>
+    </HBox>
+</VBox>

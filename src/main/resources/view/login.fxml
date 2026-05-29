@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ru.kafpin.lb7.controller.LoginController" spacing="10" alignment="CENTER">
+    <padding><Insets top="20" right="30" bottom="20" left="30"/></padding>
+    <Label text="%label.login" style="-fx-font-size: 18;"/>
+    <TextField fx:id="usernameField" promptText="%prompt.username"/>
+    <PasswordField fx:id="passwordField" promptText="%prompt.password"/>
+    <Button text="%button.login" onAction="#login"/>
+</VBox>

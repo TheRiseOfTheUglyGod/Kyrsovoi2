@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" alignment="CENTER">
+    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+    <Label text="%label.inventory" style="-fx-font-size: 16;"/>
+
+    <HBox spacing="10">
+        <Label text="%col.date"/>
+        <DatePicker fx:id="inventoryDate"/>
+    </HBox>
+
+    <Button text="%button.generateList" onAction="#generateList"/>
+
+    <TableView fx:id="inventoryTable" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="colProductId" text="%col.product" prefWidth="150"/>
+            <TableColumn fx:id="colCellId" text="%col.cell" prefWidth="120"/>
+            <TableColumn fx:id="colBookQty" text="%col.bookQty" prefWidth="120"/>
+            <TableColumn fx:id="colActualQty" text="%col.actualQty" prefWidth="130"/>
+            <TableColumn fx:id="colDiff" text="%col.diff" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="%button.finishInventory" onAction="#finishInventory"/>
+        <Button text="%button.applyAdjustments" onAction="#applyAdjustments"/>
+    </HBox>
+</VBox>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            prefWidth="750"
+            prefHeight="500">
+    <top>
+        <MenuBar>
+            <Menu text="%menu.operations">
+                <MenuItem text="%menu.receipt" onAction="#handleReceipt"/>
+                <MenuItem text="%menu.shipment" onAction="#handleShipment"/>
+                <MenuItem text="%menu.inventory" onAction="#handleInventory"/>
+            </Menu>
+            <Menu text="%menu.dictionaries">
+                <MenuItem text="%menu.products" onAction="#handleProducts"/>
+                <MenuItem text="%menu.suppliers" onAction="#handleSuppliers"/>
+                <MenuItem text="%menu.cells" onAction="#handleCells"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <StackPane fx:id="contentPane"/>
+    </center>
+    <bottom>
+        <HBox>
+            <Label fx:id="statusLabel" text="%label.status.ready"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" alignment="CENTER">
+    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+    <Label text="%label.shipment" style="-fx-font-size: 16;"/>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="%prompt.customer" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="customerField" promptText="%prompt.customer"
+                   GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="%col.date" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="shipmentDate" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Label text="%label.chooseProduct"/>
+    <ComboBox fx:id="productCombo" promptText="%menu.products" editable="true"/>
+
+    <Label text="%label.availableCells"/>
+    <TableView fx:id="stockTable" prefHeight="150">
+        <columns>
+            <TableColumn fx:id="colCellAddress" text="%col.cell" prefWidth="180"/>
+            <TableColumn fx:id="colStockQty" text="%col.quantity" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="%button.performShipment" onAction="#performShipment"/>
+    </HBox>
+</VBox>
