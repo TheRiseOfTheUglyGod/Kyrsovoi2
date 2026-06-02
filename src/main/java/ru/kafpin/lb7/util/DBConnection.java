@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 
 public class DBConnection {
@@ -44,7 +42,12 @@ public class DBConnection {
             logger.error("Попытка подключения без установленных учётных данных");
             throw new SQLException("Учётные данные не установлены. Сначала выполните аутентификацию.");
         }
+        Connection conn = DriverManager.getConnection(url, user, password);
+        // Устанавливаем путь поиска схем, чтобы процедуры в public находились
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("SET search_path TO public");
+        }
         logger.info("Подключение к БД: {}", url);
-        return DriverManager.getConnection(url, user, password);
+        return conn;
     }
 }

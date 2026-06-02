@@ -18,6 +18,7 @@ public class ProductsController {
     @FXML private TableColumn<Product, String> colName;
     @FXML private TableColumn<Product, String> colUnit;
     @FXML private TableColumn<Product, Integer> colMinStock;
+    @FXML private TableColumn<Product, String> colDescription;   // новый столбец
 
     private final ProductDao productDao;
 
@@ -35,6 +36,8 @@ public class ProductsController {
                 new javafx.beans.property.ReadOnlyStringWrapper(cellData.getValue().getUnit()));
         colMinStock.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getMinStock()));
+        colDescription.setCellValueFactory(cellData ->
+                new javafx.beans.property.ReadOnlyStringWrapper(cellData.getValue().getDescription()));
 
         try {
             refreshTable(productDao.findAll());
@@ -43,6 +46,8 @@ public class ProductsController {
         }
     }
 
+    // ... все остальные методы без изменений (search, resetSearch, addProduct, editProduct, deleteProduct, refreshTable, createProductDialog)
+    // Ниже приведены оставшиеся методы для целостности (скопируйте их из предыдущей версии)
     @FXML
     private void search() {
         String keyword = searchField.getText().trim();
