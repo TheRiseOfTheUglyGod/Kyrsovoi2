@@ -15,7 +15,6 @@
 
     <TableView fx:id="productsTable" prefHeight="350">
         <columns>
-            <TableColumn fx:id="colId" text="%col.id" prefWidth="50"/>
             <TableColumn fx:id="colArticle" text="%col.article" prefWidth="100"/>
             <TableColumn fx:id="colName" text="%col.name" prefWidth="180"/>
             <TableColumn fx:id="colUnit" text="%col.unit" prefWidth="70"/>

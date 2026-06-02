@@ -5,13 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import ru.kafpin.lb7.dao.SupplierDao;
 import ru.kafpin.lb7.model.Supplier;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SuppliersController {
 
     @FXML private TableView<Supplier> suppliersTable;
-    @FXML private TableColumn<Supplier, Long> colId;
     @FXML private TableColumn<Supplier, String> colName;
     @FXML private TableColumn<Supplier, String> colContact;
     @FXML private TableColumn<Supplier, String> colPhone;
@@ -25,8 +23,6 @@ public class SuppliersController {
 
     @FXML
     private void initialize() {
-        colId.setCellValueFactory(cellData ->
-                new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getSupplierId()));
         colName.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyStringWrapper(cellData.getValue().getName()));
         colContact.setCellValueFactory(cellData ->

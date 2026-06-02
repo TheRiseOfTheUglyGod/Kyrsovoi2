@@ -9,7 +9,6 @@
 
     <TableView fx:id="cellsTable" prefHeight="300">
         <columns>
-            <TableColumn fx:id="colId" text="%col.id" prefWidth="50"/>
             <TableColumn fx:id="colZone" text="%col.zone" prefWidth="80"/>
             <TableColumn fx:id="colRow" text="%col.row" prefWidth="80"/>
             <TableColumn fx:id="colRack" text="%col.rack" prefWidth="100"/>

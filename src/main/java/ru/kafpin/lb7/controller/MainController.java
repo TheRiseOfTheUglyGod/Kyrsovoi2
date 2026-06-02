@@ -4,15 +4,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ru.kafpin.lb7.App;
 import ru.kafpin.lb7.dao.*;
 
 import java.io.IOException;
 
 public class MainController {
-
-    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @FXML private StackPane contentPane;
     @FXML private Label statusLabel;
@@ -40,54 +37,50 @@ public class MainController {
 
     @FXML
     private void handleReceipt() {
-        logger.info("Открыта форма прихода");
         loadForm("/view/receipt.fxml",
                 new ReceiptController(productDao, supplierDao, stockDao, receiptDao));
     }
 
     @FXML
     private void handleShipment() {
-        logger.info("Открыта форма расхода");
         loadForm("/view/shipment.fxml",
                 new ShipmentController(productDao, stockDao, shipmentDao));
     }
 
     @FXML
     private void handleInventory() {
-        logger.info("Открыта форма инвентаризации");
         loadForm("/view/inventory.fxml",
                 new InventoryController(productDao, stockDao, inventoryDao));
     }
 
     @FXML
     private void handleProducts() {
-        logger.info("Открыт справочник товаров");
-        loadForm("/view/products.fxml", new ProductsController(productDao));
+        loadForm("/view/products.fxml",
+                new ProductsController(productDao));
     }
 
     @FXML
     private void handleSuppliers() {
-        logger.info("Открыт справочник поставщиков");
-        loadForm("/view/suppliers.fxml", new SuppliersController(supplierDao));
+        loadForm("/view/suppliers.fxml",
+                new SuppliersController(supplierDao));
     }
 
     @FXML
     private void handleCells() {
-        logger.info("Открыт справочник ячеек");
-        loadForm("/view/cells.fxml", new CellsController(storageCellDao));
+        loadForm("/view/cells.fxml",
+                new CellsController(storageCellDao));
     }
 
     private void loadForm(String fxmlPath, Object controller) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath), App.bundle);
             loader.setController(controller);
             contentPane.getChildren().clear();
             contentPane.getChildren().add(loader.load());
-            statusLabel.setText("Готов");
-            logger.debug("Форма {} загружена успешно", fxmlPath);
+            statusLabel.setText(App.bundle.getString("label.status.ready"));
         } catch (IOException e) {
             statusLabel.setText("Ошибка загрузки формы");
-            logger.error("Ошибка загрузки формы {}", fxmlPath, e);
+            e.printStackTrace();
         }
     }
 }

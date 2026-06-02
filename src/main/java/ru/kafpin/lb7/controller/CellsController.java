@@ -5,13 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import ru.kafpin.lb7.dao.StorageCellDao;
 import ru.kafpin.lb7.model.StorageCell;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CellsController {
 
     @FXML private TableView<StorageCell> cellsTable;
-    @FXML private TableColumn<StorageCell, Long> colId;
     @FXML private TableColumn<StorageCell, String> colZone;
     @FXML private TableColumn<StorageCell, Integer> colRow;
     @FXML private TableColumn<StorageCell, String> colRack;
@@ -25,8 +23,6 @@ public class CellsController {
 
     @FXML
     private void initialize() {
-        colId.setCellValueFactory(cellData ->
-                new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getCellId()));
         colZone.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyStringWrapper(cellData.getValue().getZone()));
         colRow.setCellValueFactory(cellData ->

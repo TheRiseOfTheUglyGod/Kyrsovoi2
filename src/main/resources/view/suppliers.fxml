@@ -9,7 +9,6 @@
 
     <TableView fx:id="suppliersTable" prefHeight="300">
         <columns>
-            <TableColumn fx:id="colId" text="%col.id" prefWidth="50"/>
             <TableColumn fx:id="colName" text="%col.name" prefWidth="200"/>
             <TableColumn fx:id="colContact" text="%col.contact" prefWidth="150"/>
             <TableColumn fx:id="colPhone" text="%col.phone" prefWidth="120"/>

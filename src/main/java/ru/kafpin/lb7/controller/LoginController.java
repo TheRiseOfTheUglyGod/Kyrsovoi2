@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kafpin.lb7.App;
 import ru.kafpin.lb7.auth.AuthManager;
 import ru.kafpin.lb7.dao.*;
 import ru.kafpin.lb7.dao.impl.*;
@@ -48,12 +49,12 @@ public class LoginController {
             InventoryDao inventoryDao = new InventoryDaoImpl();
 
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main.fxml"), App.bundle);
                 MainController mainController = new MainController(productDao, supplierDao,
                         storageCellDao, stockDao, receiptDao, shipmentDao, inventoryDao);
                 loader.setController(mainController);
                 stage.setScene(new Scene(loader.load()));
-                stage.setTitle("АРМ менеджера склада");
+                stage.setTitle(App.bundle.getString("app.title"));
             } catch (Exception e) {
                 logger.error("Ошибка загрузки главного окна", e);
                 new Alert(Alert.AlertType.ERROR, "Ошибка запуска главного окна").showAndWait();

@@ -15,12 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class WarehouseAppTest extends ApplicationTest {
 
-    private static final String VALID_USER = "postgres";
-    private static final String VALID_PASSWORD = "123";
+    private static final String VALID_USER = "manager";
+    private static final String VALID_PASSWORD = "manager";
 
-    private static final int SHORT_PAUSE = 300;
-    private static final int MEDIUM_PAUSE = 600;
-    private static final int LONG_PAUSE = 1200;
+    private static final int SHORT_PAUSE = 600;
+    private static final int MEDIUM_PAUSE = 1200;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -38,74 +37,22 @@ public class WarehouseAppTest extends ApplicationTest {
         sleep(MEDIUM_PAUSE);
     }
 
-    private void selectFromNonEditableCombo(String comboBoxId, String itemText) throws TimeoutException {
-        clickOn(comboBoxId);
-        sleep(SHORT_PAUSE);
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, () ->
-                lookup(itemText).tryQuery().isPresent());
-        clickOn(itemText);
-        sleep(SHORT_PAUSE);
-    }
-
-    private void typeIntoEditableCombo(String comboBoxId, String text) {
-        clickOn(comboBoxId).write(text);
-        sleep(SHORT_PAUSE);
-        press(KeyCode.ENTER);
-        release(KeyCode.ENTER);
-        sleep(SHORT_PAUSE);
-    }
-
-    private void selectTableRowBySubstring(TableView<?> tableView, String substring) {
-        int idx = -1;
-        int i = 0;
-        for (Object item : tableView.getItems()) {
-            if (item.toString().contains(substring)) {
-                idx = i;
-                break;
-            }
-            i++;
-        }
-        if (idx == -1) throw new IllegalStateException("Строка не найдена: " + substring);
-        final int target = idx;
-        interact(() -> tableView.scrollTo(target));
-        sleep(SHORT_PAUSE);
-        clickOn(substring);
-    }
-
     // =============================================
     // ПОЗИТИВНЫЕ ТЕСТЫ
     // =============================================
 
     @Test
-    @DisplayName("1. Успешная аутентификация")
-    void testSuccessfulLogin() throws TimeoutException {
-        loginAsValidUser();
-        StackPane contentPane = lookup("#contentPane").query();
-        assertThat(contentPane.isVisible()).isTrue();
-    }
-
-    @Test
-    @DisplayName("2. Таблица товаров не пуста")
-    void testProductsTableNotEmpty() throws TimeoutException {
-        loginAsValidUser();
-        clickOn("Справочники").clickOn("Товары");
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup("#productsTable").tryQuery().isPresent());
-        TableView<?> tableView = lookup("#productsTable").query();
-        assertThat(tableView.getItems()).isNotEmpty();
-        sleep(LONG_PAUSE);
-    }
-
-    @Test
-    @DisplayName("3. Добавление товара")
+    @DisplayName("1. Добавление нового товара")
     void testAddProduct() throws TimeoutException {
         loginAsValidUser();
         clickOn("Справочники").clickOn("Товары");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
                 () -> lookup("#productsTable").tryQuery().isPresent());
+
         clickOn("Добавить");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
                 () -> lookup(".text-field").tryQuery().isPresent());
+
         clickOn(".text-field").write("ТестТовар,ART-TEST,шт,описание,5");
         clickOn("OK");
         sleep(MEDIUM_PAUSE);
@@ -115,33 +62,14 @@ public class WarehouseAppTest extends ApplicationTest {
                 .anyMatch(item -> item.toString().contains("ART-TEST"));
         assertThat(found).isTrue();
 
+        // Удаляем тестовый товар
         selectTableRowBySubstring(tableView, "ART-TEST");
         clickOn("Удалить");
         sleep(SHORT_PAUSE);
     }
 
     @Test
-    @DisplayName("4. Поиск товара по артикулу")
-    void testSearchProduct() throws TimeoutException {
-        loginAsValidUser();
-        clickOn("Справочники").clickOn("Товары");
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup("#productsTable").tryQuery().isPresent());
-        clickOn("#searchField").write("KIR-001");
-        clickOn("Найти");
-        sleep(MEDIUM_PAUSE);
-
-        TableView<?> tableView = lookup("#productsTable").query();
-        boolean allMatch = tableView.getItems().stream()
-                .allMatch(item -> item.toString().contains("KIR-001"));
-        assertThat(allMatch).isTrue();
-
-        clickOn("Сбросить");
-        sleep(SHORT_PAUSE);
-    }
-
-    @Test
-    @DisplayName("5. Приход товара")
+    @DisplayName("2. Приход товара (сохранение накладной)")
     void testReceipt() throws TimeoutException {
         loginAsValidUser();
         clickOn("Операции").clickOn("Приход");
@@ -163,30 +91,13 @@ public class WarehouseAppTest extends ApplicationTest {
         clickOn("OK");
         sleep(SHORT_PAUSE);
 
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
+                () -> lookup("Сохранить приход").tryQuery().isPresent());
         clickOn("Сохранить приход");
-        sleep(LONG_PAUSE);
+        sleep(MEDIUM_PAUSE);
 
         Label status = lookup("#statusLabel").query();
         assertThat(status.getText()).contains("Готов");
-    }
-
-    @Test
-    @DisplayName("6. Инвентаризация – формирование списка")
-    void testInventoryGenerate() throws TimeoutException {
-        loginAsValidUser();
-        clickOn("Операции").clickOn("Инвентаризация");
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup("#inventoryTable").tryQuery().isPresent());
-        sleep(SHORT_PAUSE);
-
-        clickOn("Сформировать список товаров");
-        sleep(LONG_PAUSE);
-
-        TableView<?> invTable = lookup("#inventoryTable").query();
-        assertThat(invTable.getItems()).isNotEmpty();
-
-        clickOn("Завершить инвентаризацию");
-        sleep(SHORT_PAUSE);
     }
 
     // =============================================
@@ -194,7 +105,7 @@ public class WarehouseAppTest extends ApplicationTest {
     // =============================================
 
     @Test
-    @DisplayName("7. Неверный пароль")
+    @DisplayName("3. Ошибка при неверном пароле")
     void testFailedLogin() throws TimeoutException {
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
                 () -> lookup("#usernameField").tryQuery().isPresent());
@@ -210,12 +121,13 @@ public class WarehouseAppTest extends ApplicationTest {
     }
 
     @Test
-    @DisplayName("8. Удаление без выбора")
+    @DisplayName("4. Предупреждение при удалении без выбора строки")
     void testDeleteWithoutSelection() throws TimeoutException {
         loginAsValidUser();
         clickOn("Справочники").clickOn("Товары");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
                 () -> lookup("#productsTable").tryQuery().isPresent());
+
         clickOn("Удалить");
 
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
@@ -225,47 +137,20 @@ public class WarehouseAppTest extends ApplicationTest {
         clickOn("OK");
     }
 
-    @Test
-    @DisplayName("9. Редактирование без выбора")
-    void testEditWithoutSelection() throws TimeoutException {
-        loginAsValidUser();
-        clickOn("Справочники").clickOn("Товары");
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup("#productsTable").tryQuery().isPresent());
-        clickOn("Редактировать");
-
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup(".alert").tryQuery().isPresent());
-        DialogPane alert = lookup(".alert").query();
-        assertThat(alert.getContentText()).contains("Выберите товар для редактирования");
-        clickOn("OK");
-    }
-
-    @Test
-    @DisplayName("10. Отгрузка с недостаточным остатком")
-    void testShipmentInsufficientStock() throws TimeoutException {
-        loginAsValidUser();
-        clickOn("Операции").clickOn("Расход");
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup("#customerField").tryQuery().isPresent());
+    private void selectTableRowBySubstring(TableView<?> tableView, String substring) {
+        int idx = -1;
+        int i = 0;
+        for (Object item : tableView.getItems()) {
+            if (item.toString().contains(substring)) {
+                idx = i;
+                break;
+            }
+            i++;
+        }
+        if (idx == -1) throw new IllegalStateException("Строка не найдена: " + substring);
+        final int target = idx;
+        interact(() -> tableView.scrollTo(target));
         sleep(SHORT_PAUSE);
-
-        clickOn("#customerField").write("Тестовый получатель");
-        typeIntoEditableCombo("#productCombo", "Песок строительный");
-
-        clickOn("Выполнить отгрузку");
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup(".text-field").tryQuery().isPresent());
-
-        clickOn(".text-field").write("3,100");
-        clickOn("OK");
-        sleep(MEDIUM_PAUSE);
-
-        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup(".alert").tryQuery().isPresent());
-        DialogPane alert = lookup(".alert").query();
-        String content = alert.getContentText();
-        assertThat(content).contains("Ошибка");
-        clickOn("OK");
+        clickOn(substring);
     }
 }

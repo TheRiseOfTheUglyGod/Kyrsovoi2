@@ -11,7 +11,6 @@ public class ProductsController {
 
     @FXML private TextField searchField;
     @FXML private TableView<Product> productsTable;
-    @FXML private TableColumn<Product, Long> colId;
     @FXML private TableColumn<Product, String> colArticle;
     @FXML private TableColumn<Product, String> colName;
     @FXML private TableColumn<Product, String> colUnit;
@@ -25,8 +24,6 @@ public class ProductsController {
 
     @FXML
     private void initialize() {
-        colId.setCellValueFactory(cellData ->
-                new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getProductId()));
         colArticle.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyStringWrapper(cellData.getValue().getArticle()));
         colName.setCellValueFactory(cellData ->
