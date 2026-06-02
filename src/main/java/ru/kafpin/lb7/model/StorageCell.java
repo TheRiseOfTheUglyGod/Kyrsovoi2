@@ -16,4 +16,9 @@ public class StorageCell {
     private Integer cellNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return String.format("Зона %s, ряд %d, стеллаж %s, ячейка %d", zone, rowNum, rack, cellNumber);
+    }
 }

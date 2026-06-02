@@ -17,4 +17,9 @@ public class Supplier {
     private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return name + (contactPerson != null && !contactPerson.isEmpty() ? " (" + contactPerson + ")" : "");
+    }
 }

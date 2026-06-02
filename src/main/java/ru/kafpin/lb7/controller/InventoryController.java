@@ -9,15 +9,14 @@ import ru.kafpin.lb7.dao.*;
 import ru.kafpin.lb7.model.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class InventoryController {
 
     @FXML private DatePicker inventoryDate;
     @FXML private TableView<InventoryItem> inventoryTable;
-    @FXML private TableColumn<InventoryItem, Long> colProductId;
-    @FXML private TableColumn<InventoryItem, Long> colCellId;
+    @FXML private TableColumn<InventoryItem, String> colProduct;
+    @FXML private TableColumn<InventoryItem, String> colCell;
     @FXML private TableColumn<InventoryItem, Integer> colBookQty;
     @FXML private TableColumn<InventoryItem, Integer> colActualQty;
     @FXML private TableColumn<InventoryItem, Integer> colDiff;
@@ -25,27 +24,32 @@ public class InventoryController {
     private final ProductDao productDao;
     private final StockDao stockDao;
     private final InventoryDao inventoryDao;
+    private final StorageCellDao cellDao;
 
     private Inventory currentInventory;
+    private Map<Long, String> productNames = new HashMap<>();
+    private Map<Long, String> cellDescriptions = new HashMap<>();
 
-    public InventoryController(ProductDao productDao, StockDao stockDao, InventoryDao inventoryDao) {
+    public InventoryController(ProductDao productDao, StockDao stockDao,
+                               InventoryDao inventoryDao, StorageCellDao cellDao) {
         this.productDao = productDao;
         this.stockDao = stockDao;
         this.inventoryDao = inventoryDao;
+        this.cellDao = cellDao;
     }
 
     @FXML
     private void initialize() {
         inventoryDate.setValue(LocalDate.now());
 
-        colProductId.setCellValueFactory(cellData ->
-                new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getProductId()));
-        colCellId.setCellValueFactory(cellData ->
-                new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getCellId()));
+        colProduct.setCellValueFactory(cellData ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        productNames.getOrDefault(cellData.getValue().getProductId(), "Товар ?")));
+        colCell.setCellValueFactory(cellData ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        cellDescriptions.getOrDefault(cellData.getValue().getCellId(), "Ячейка ?")));
         colBookQty.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getBookQuantity()));
-
-        // Фактическое количество – редактируемое (по умолчанию равно учётному)
         colActualQty.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getActualQuantity()));
         colActualQty.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
@@ -55,11 +59,8 @@ public class InventoryController {
             item.setDifference(item.getBookQuantity() - event.getNewValue());
             inventoryTable.refresh();
         });
-
-        // Расхождение – вычисляемое, только для чтения
         colDiff.setCellValueFactory(cellData ->
                 new javafx.beans.property.ReadOnlyObjectWrapper<>(cellData.getValue().getDifference()));
-
         inventoryTable.setEditable(true);
     }
 
@@ -71,6 +72,13 @@ public class InventoryController {
             inv.setStatus("in_progress");
 
             List<Product> products = productDao.findAll();
+            List<StorageCell> cells = cellDao.findAll();
+
+            productNames.clear();
+            for (Product p : products) productNames.put(p.getProductId(), p.getName());
+            cellDescriptions.clear();
+            for (StorageCell c : cells) cellDescriptions.put(c.getCellId(), c.toString());
+
             List<InventoryItem> items = new ArrayList<>();
             for (Product p : products) {
                 List<Stock> stocks = stockDao.findByProduct(p.getProductId());
@@ -79,7 +87,6 @@ public class InventoryController {
                     item.setProductId(p.getProductId());
                     item.setCellId(s.getCellId());
                     item.setBookQuantity(s.getQuantity());
-                    // Фактическое количество по умолчанию равно учётному, расхождение = 0
                     item.setActualQuantity(s.getQuantity());
                     item.setDifference(0);
                     items.add(item);
@@ -121,17 +128,15 @@ public class InventoryController {
 
         try {
             for (InventoryItem item : items) {
-                // Сохраняем фактическое количество в БД (даже если совпадает – для истории)
                 inventoryDao.updateActualQuantity(item.getInventoryItemId(), item.getActualQuantity());
 
                 int diff = item.getBookQuantity() - item.getActualQuantity();
                 if (diff != 0) {
                     discrepancies++;
-                    report.append(String.format("Товар ID %d, ячейка ID %d: учёт %d, факт %d, разница %d\n",
-                            item.getProductId(), item.getCellId(),
+                    report.append(String.format("Товар: %s, Ячейка: %s, учёт: %d, факт: %d, разница: %d\n",
+                            productNames.getOrDefault(item.getProductId(), "?"),
+                            cellDescriptions.getOrDefault(item.getCellId(), "?"),
                             item.getBookQuantity(), item.getActualQuantity(), diff));
-
-                    // Корректируем остаток на складе
                     stockDao.setQuantity(item.getProductId(), item.getCellId(), item.getActualQuantity());
                 }
             }
@@ -152,7 +157,6 @@ public class InventoryController {
             alert.getDialogPane().setContent(textArea);
             alert.showAndWait();
 
-            // Обновляем таблицу
             inventoryTable.refresh();
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Ошибка применения корректировок: " + e.getMessage()).showAndWait();

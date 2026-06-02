@@ -18,4 +18,9 @@ public class Product {
     private Integer minStock;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return name + " (" + article + ")";
+    }
 }

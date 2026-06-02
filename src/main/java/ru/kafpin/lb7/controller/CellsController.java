@@ -3,9 +3,12 @@ package ru.kafpin.lb7.controller;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import ru.kafpin.lb7.App;
 import ru.kafpin.lb7.dao.StorageCellDao;
 import ru.kafpin.lb7.model.StorageCell;
 import java.util.List;
+import java.util.Optional;
 
 public class CellsController {
 
@@ -36,23 +39,14 @@ public class CellsController {
 
     @FXML
     private void addCell() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Новая ячейка");
-        dialog.setHeaderText("Введите: зона, ряд, стеллаж, номер ячейки через запятую");
-        dialog.showAndWait().ifPresent(input -> {
-            String[] parts = input.split(",");
-            if (parts.length == 4) {
-                StorageCell cell = new StorageCell();
-                cell.setZone(parts[0].trim());
-                cell.setRowNum(Integer.parseInt(parts[1].trim()));
-                cell.setRack(parts[2].trim());
-                cell.setCellNumber(Integer.parseInt(parts[3].trim()));
-                try {
-                    storageCellDao.create(cell);
-                    refresh();
-                } catch (Exception e) {
-                    new Alert(Alert.AlertType.ERROR, "Ошибка создания: " + e.getMessage()).showAndWait();
-                }
+        Dialog<StorageCell> dialog = createCellDialog(null);
+        Optional<StorageCell> result = dialog.showAndWait();
+        result.ifPresent(cell -> {
+            try {
+                storageCellDao.create(cell);
+                refresh();
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "Ошибка создания: " + e.getMessage()).showAndWait();
             }
         });
     }
@@ -64,23 +58,18 @@ public class CellsController {
             new Alert(Alert.AlertType.WARNING, "Выберите ячейку").showAndWait();
             return;
         }
-        TextInputDialog dialog = new TextInputDialog(
-                selected.getZone() + "," + selected.getRowNum() + "," + selected.getRack() + "," + selected.getCellNumber()
-        );
-        dialog.setTitle("Редактирование ячейки");
-        dialog.showAndWait().ifPresent(input -> {
-            String[] parts = input.split(",");
-            if (parts.length == 4) {
-                selected.setZone(parts[0].trim());
-                selected.setRowNum(Integer.parseInt(parts[1].trim()));
-                selected.setRack(parts[2].trim());
-                selected.setCellNumber(Integer.parseInt(parts[3].trim()));
-                try {
-                    storageCellDao.update(selected);
-                    refresh();
-                } catch (Exception e) {
-                    new Alert(Alert.AlertType.ERROR, "Ошибка обновления: " + e.getMessage()).showAndWait();
-                }
+        Dialog<StorageCell> dialog = createCellDialog(selected);
+        Optional<StorageCell> result = dialog.showAndWait();
+        result.ifPresent(cell -> {
+            selected.setZone(cell.getZone());
+            selected.setRowNum(cell.getRowNum());
+            selected.setRack(cell.getRack());
+            selected.setCellNumber(cell.getCellNumber());
+            try {
+                storageCellDao.update(selected);
+                refresh();
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "Ошибка обновления: " + e.getMessage()).showAndWait();
             }
         });
     }
@@ -108,5 +97,62 @@ public class CellsController {
             System.err.println("Ошибка загрузки ячеек: " + e.getMessage());
             cellsTable.setItems(FXCollections.observableArrayList());
         }
+    }
+
+    private Dialog<StorageCell> createCellDialog(StorageCell existing) {
+        Dialog<StorageCell> dialog = new Dialog<>();
+        dialog.setTitle(existing == null ? "Новая ячейка" : "Редактирование ячейки");
+        dialog.setHeaderText("Введите параметры ячейки");
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButtonType = new ButtonType(
+                App.bundle.getString("button.cancel"),
+                ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField zoneField = new TextField();
+        TextField rowField = new TextField();
+        TextField rackField = new TextField();
+        TextField cellNumField = new TextField();
+
+        if (existing != null) {
+            zoneField.setText(existing.getZone());
+            rowField.setText(String.valueOf(existing.getRowNum()));
+            rackField.setText(existing.getRack());
+            cellNumField.setText(String.valueOf(existing.getCellNumber()));
+        }
+
+        grid.add(new Label("Зона:"), 0, 0);
+        grid.add(zoneField, 1, 0);
+        grid.add(new Label("Ряд:"), 0, 1);
+        grid.add(rowField, 1, 1);
+        grid.add(new Label("Стеллаж:"), 0, 2);
+        grid.add(rackField, 1, 2);
+        grid.add(new Label("Номер ячейки:"), 0, 3);
+        grid.add(cellNumField, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                StorageCell cell = new StorageCell();
+                cell.setZone(zoneField.getText().trim());
+                try {
+                    cell.setRowNum(Integer.parseInt(rowField.getText().trim()));
+                } catch (NumberFormatException e) { cell.setRowNum(0); }
+                cell.setRack(rackField.getText().trim());
+                try {
+                    cell.setCellNumber(Integer.parseInt(cellNumField.getText().trim()));
+                } catch (NumberFormatException e) { cell.setCellNumber(0); }
+                return cell;
+            }
+            return null;
+        });
+        return dialog;
     }
 }

@@ -38,37 +38,34 @@ public class MainController {
     @FXML
     private void handleReceipt() {
         loadForm("/view/receipt.fxml",
-                new ReceiptController(productDao, supplierDao, stockDao, receiptDao));
+                new ReceiptController(productDao, supplierDao, stockDao, receiptDao, storageCellDao));
     }
 
     @FXML
     private void handleShipment() {
         loadForm("/view/shipment.fxml",
-                new ShipmentController(productDao, stockDao, shipmentDao));
+                new ShipmentController(productDao, stockDao, shipmentDao, storageCellDao));
     }
 
     @FXML
     private void handleInventory() {
         loadForm("/view/inventory.fxml",
-                new InventoryController(productDao, stockDao, inventoryDao));
+                new InventoryController(productDao, stockDao, inventoryDao, storageCellDao));
     }
 
     @FXML
     private void handleProducts() {
-        loadForm("/view/products.fxml",
-                new ProductsController(productDao));
+        loadForm("/view/products.fxml", new ProductsController(productDao));
     }
 
     @FXML
     private void handleSuppliers() {
-        loadForm("/view/suppliers.fxml",
-                new SuppliersController(supplierDao));
+        loadForm("/view/suppliers.fxml", new SuppliersController(supplierDao));
     }
 
     @FXML
     private void handleCells() {
-        loadForm("/view/cells.fxml",
-                new CellsController(storageCellDao));
+        loadForm("/view/cells.fxml", new CellsController(storageCellDao));
     }
 
     private void loadForm(String fxmlPath, Object controller) {

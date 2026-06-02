@@ -3,9 +3,12 @@ package ru.kafpin.lb7.controller;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import ru.kafpin.lb7.App;
 import ru.kafpin.lb7.dao.ProductDao;
 import ru.kafpin.lb7.model.Product;
 import java.util.List;
+import java.util.Optional;
 
 public class ProductsController {
 
@@ -66,24 +69,14 @@ public class ProductsController {
 
     @FXML
     private void addProduct() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Новый товар");
-        dialog.setHeaderText("Введите: название, артикул, ед.изм, описание, мин.остаток через запятую");
-        dialog.showAndWait().ifPresent(input -> {
-            String[] parts = input.split(",");
-            if (parts.length >= 3) {
-                Product p = new Product();
-                p.setName(parts[0].trim());
-                p.setArticle(parts[1].trim());
-                p.setUnit(parts[2].trim());
-                p.setDescription(parts.length > 3 ? parts[3].trim() : "");
-                p.setMinStock(parts.length > 4 ? Integer.parseInt(parts[4].trim()) : 0);
-                try {
-                    productDao.create(p);
-                    refreshTable(productDao.findAll());
-                } catch (Exception e) {
-                    new Alert(Alert.AlertType.ERROR, "Ошибка создания: " + e.getMessage()).showAndWait();
-                }
+        Dialog<Product> dialog = createProductDialog(null);
+        Optional<Product> result = dialog.showAndWait();
+        result.ifPresent(product -> {
+            try {
+                productDao.create(product);
+                refreshTable(productDao.findAll());
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "Ошибка создания: " + e.getMessage()).showAndWait();
             }
         });
     }
@@ -95,25 +88,19 @@ public class ProductsController {
             new Alert(Alert.AlertType.WARNING, "Выберите товар для редактирования").showAndWait();
             return;
         }
-        TextInputDialog dialog = new TextInputDialog(
-                selected.getName() + "," + selected.getArticle() + "," + selected.getUnit() + ","
-                        + selected.getDescription() + "," + selected.getMinStock()
-        );
-        dialog.setTitle("Редактирование товара");
-        dialog.showAndWait().ifPresent(input -> {
-            String[] parts = input.split(",");
-            if (parts.length >= 3) {
-                selected.setName(parts[0].trim());
-                selected.setArticle(parts[1].trim());
-                selected.setUnit(parts[2].trim());
-                selected.setDescription(parts.length > 3 ? parts[3].trim() : "");
-                selected.setMinStock(parts.length > 4 ? Integer.parseInt(parts[4].trim()) : 0);
-                try {
-                    productDao.update(selected);
-                    refreshTable(productDao.findAll());
-                } catch (Exception e) {
-                    new Alert(Alert.AlertType.ERROR, "Ошибка обновления: " + e.getMessage()).showAndWait();
-                }
+        Dialog<Product> dialog = createProductDialog(selected);
+        Optional<Product> result = dialog.showAndWait();
+        result.ifPresent(product -> {
+            selected.setName(product.getName());
+            selected.setArticle(product.getArticle());
+            selected.setUnit(product.getUnit());
+            selected.setDescription(product.getDescription());
+            selected.setMinStock(product.getMinStock());
+            try {
+                productDao.update(selected);
+                refreshTable(productDao.findAll());
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "Ошибка обновления: " + e.getMessage()).showAndWait();
             }
         });
     }
@@ -135,5 +122,68 @@ public class ProductsController {
 
     private void refreshTable(List<Product> list) {
         productsTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+    private Dialog<Product> createProductDialog(Product existing) {
+        Dialog<Product> dialog = new Dialog<>();
+        dialog.setTitle(existing == null ? "Новый товар" : "Редактирование товара");
+        dialog.setHeaderText("Введите данные товара");
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButtonType = new ButtonType(
+                App.bundle.getString("button.cancel"),
+                ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField nameField = new TextField();
+        TextField articleField = new TextField();
+        TextField unitField = new TextField();
+        TextField descField = new TextField();
+        TextField minStockField = new TextField();
+
+        if (existing != null) {
+            nameField.setText(existing.getName());
+            articleField.setText(existing.getArticle());
+            unitField.setText(existing.getUnit());
+            descField.setText(existing.getDescription());
+            minStockField.setText(String.valueOf(existing.getMinStock()));
+        }
+
+        grid.add(new Label("Название:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Артикул:"), 0, 1);
+        grid.add(articleField, 1, 1);
+        grid.add(new Label("Ед. изм.:"), 0, 2);
+        grid.add(unitField, 1, 2);
+        grid.add(new Label("Описание:"), 0, 3);
+        grid.add(descField, 1, 3);
+        grid.add(new Label("Мин. остаток:"), 0, 4);
+        grid.add(minStockField, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                Product product = new Product();
+                product.setName(nameField.getText().trim());
+                product.setArticle(articleField.getText().trim());
+                product.setUnit(unitField.getText().trim());
+                product.setDescription(descField.getText().trim());
+                try {
+                    product.setMinStock(Integer.parseInt(minStockField.getText().trim()));
+                } catch (NumberFormatException e) {
+                    product.setMinStock(0);
+                }
+                return product;
+            }
+            return null;
+        });
+
+        return dialog;
     }
 }
