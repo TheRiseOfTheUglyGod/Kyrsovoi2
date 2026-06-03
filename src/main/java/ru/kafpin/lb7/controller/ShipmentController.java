@@ -99,14 +99,13 @@ public class ShipmentController {
         }
 
         Dialog<ShipmentItem> dialog = new Dialog<>();
-        dialog.setTitle("Отгрузка товара");
-        dialog.setHeaderText("Выберите ячейку и укажите количество");
+        dialog.setTitle(App.bundle.getString("shipment.dialog.title"));
+        dialog.setHeaderText(App.bundle.getString("shipment.dialog.header"));
 
-        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType okButtonType = new ButtonType(
+                App.bundle.getString("button.ok"), ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType(
-                App.bundle.getString("button.cancel"),
-                ButtonBar.ButtonData.CANCEL_CLOSE
-        );
+                App.bundle.getString("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
 
         GridPane grid = new GridPane();
@@ -121,9 +120,9 @@ public class ShipmentController {
 
         TextField qtyField = new TextField();
 
-        grid.add(new Label("Ячейка:"), 0, 0);
+        grid.add(new Label(App.bundle.getString("shipment.dialog.field.cell")), 0, 0);
         grid.add(cellCombo, 1, 0);
-        grid.add(new Label("Количество:"), 0, 1);
+        grid.add(new Label(App.bundle.getString("shipment.dialog.field.quantity")), 0, 1);
         grid.add(qtyField, 1, 1);
 
         dialog.getDialogPane().setContent(grid);

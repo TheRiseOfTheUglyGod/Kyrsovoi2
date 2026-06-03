@@ -18,7 +18,7 @@ public class ProductsController {
     @FXML private TableColumn<Product, String> colName;
     @FXML private TableColumn<Product, String> colUnit;
     @FXML private TableColumn<Product, Integer> colMinStock;
-    @FXML private TableColumn<Product, String> colDescription;   // новый столбец
+    @FXML private TableColumn<Product, String> colDescription;
 
     private final ProductDao productDao;
 
@@ -46,8 +46,6 @@ public class ProductsController {
         }
     }
 
-    // ... все остальные методы без изменений (search, resetSearch, addProduct, editProduct, deleteProduct, refreshTable, createProductDialog)
-    // Ниже приведены оставшиеся методы для целостности (скопируйте их из предыдущей версии)
     @FXML
     private void search() {
         String keyword = searchField.getText().trim();
@@ -131,14 +129,15 @@ public class ProductsController {
 
     private Dialog<Product> createProductDialog(Product existing) {
         Dialog<Product> dialog = new Dialog<>();
-        dialog.setTitle(existing == null ? "Новый товар" : "Редактирование товара");
-        dialog.setHeaderText("Введите данные товара");
+        dialog.setTitle(existing == null ?
+                App.bundle.getString("product.dialog.new") :
+                App.bundle.getString("product.dialog.edit"));
+        dialog.setHeaderText(App.bundle.getString("product.dialog.header"));
 
-        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType okButtonType = new ButtonType(
+                App.bundle.getString("button.ok"), ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType(
-                App.bundle.getString("button.cancel"),
-                ButtonBar.ButtonData.CANCEL_CLOSE
-        );
+                App.bundle.getString("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
 
         GridPane grid = new GridPane();
@@ -159,15 +158,15 @@ public class ProductsController {
             minStockField.setText(String.valueOf(existing.getMinStock()));
         }
 
-        grid.add(new Label("Название:"), 0, 0);
+        grid.add(new Label(App.bundle.getString("product.field.name")), 0, 0);
         grid.add(nameField, 1, 0);
-        grid.add(new Label("Артикул:"), 0, 1);
+        grid.add(new Label(App.bundle.getString("product.field.article")), 0, 1);
         grid.add(articleField, 1, 1);
-        grid.add(new Label("Ед. изм.:"), 0, 2);
+        grid.add(new Label(App.bundle.getString("product.field.unit")), 0, 2);
         grid.add(unitField, 1, 2);
-        grid.add(new Label("Описание:"), 0, 3);
+        grid.add(new Label(App.bundle.getString("product.field.description")), 0, 3);
         grid.add(descField, 1, 3);
-        grid.add(new Label("Мин. остаток:"), 0, 4);
+        grid.add(new Label(App.bundle.getString("product.field.minStock")), 0, 4);
         grid.add(minStockField, 1, 4);
 
         dialog.getDialogPane().setContent(grid);

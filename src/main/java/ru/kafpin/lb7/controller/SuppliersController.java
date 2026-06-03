@@ -102,14 +102,15 @@ public class SuppliersController {
 
     private Dialog<Supplier> createSupplierDialog(Supplier existing) {
         Dialog<Supplier> dialog = new Dialog<>();
-        dialog.setTitle(existing == null ? "Новый поставщик" : "Редактирование поставщика");
-        dialog.setHeaderText("Введите данные поставщика");
+        dialog.setTitle(existing == null ?
+                App.bundle.getString("supplier.dialog.new") :
+                App.bundle.getString("supplier.dialog.edit"));
+        dialog.setHeaderText(App.bundle.getString("supplier.dialog.header"));
 
-        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType okButtonType = new ButtonType(
+                App.bundle.getString("button.ok"), ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType(
-                App.bundle.getString("button.cancel"),
-                ButtonBar.ButtonData.CANCEL_CLOSE
-        );
+                App.bundle.getString("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
 
         GridPane grid = new GridPane();
@@ -130,15 +131,15 @@ public class SuppliersController {
             addressField.setText(existing.getAddress());
         }
 
-        grid.add(new Label("Наименование:"), 0, 0);
+        grid.add(new Label(App.bundle.getString("supplier.field.name")), 0, 0);
         grid.add(nameField, 1, 0);
-        grid.add(new Label("Контактное лицо:"), 0, 1);
+        grid.add(new Label(App.bundle.getString("supplier.field.contact")), 0, 1);
         grid.add(contactField, 1, 1);
-        grid.add(new Label("Телефон:"), 0, 2);
+        grid.add(new Label(App.bundle.getString("supplier.field.phone")), 0, 2);
         grid.add(phoneField, 1, 2);
-        grid.add(new Label("Email:"), 0, 3);
+        grid.add(new Label(App.bundle.getString("supplier.field.email")), 0, 3);
         grid.add(emailField, 1, 3);
-        grid.add(new Label("Адрес:"), 0, 4);
+        grid.add(new Label(App.bundle.getString("supplier.field.address")), 0, 4);
         grid.add(addressField, 1, 4);
 
         dialog.getDialogPane().setContent(grid);

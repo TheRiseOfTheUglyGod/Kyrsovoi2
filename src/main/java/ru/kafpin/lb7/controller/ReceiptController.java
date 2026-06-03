@@ -71,14 +71,13 @@ public class ReceiptController {
     @FXML
     private void addItem() {
         Dialog<ReceiptItem> dialog = new Dialog<>();
-        dialog.setTitle("Добавить позицию");
-        dialog.setHeaderText("Выберите товар, ячейку и укажите количество и цену");
+        dialog.setTitle(App.bundle.getString("receipt.item.dialog.title"));
+        dialog.setHeaderText(App.bundle.getString("receipt.item.dialog.header"));
 
-        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType okButtonType = new ButtonType(
+                App.bundle.getString("button.ok"), ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButtonType = new ButtonType(
-                App.bundle.getString("button.cancel"),
-                ButtonBar.ButtonData.CANCEL_CLOSE
-        );
+                App.bundle.getString("button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
 
         GridPane grid = new GridPane();
@@ -95,13 +94,13 @@ public class ReceiptController {
             cellCombo.setItems(FXCollections.observableArrayList(cellDao.findAll()));
         } catch (Exception e) { /* ignore */ }
 
-        grid.add(new Label("Товар:"), 0, 0);
+        grid.add(new Label(App.bundle.getString("receipt.item.field.product")), 0, 0);
         grid.add(productCombo, 1, 0);
-        grid.add(new Label("Количество:"), 0, 1);
+        grid.add(new Label(App.bundle.getString("receipt.item.field.quantity")), 0, 1);
         grid.add(qtyField, 1, 1);
-        grid.add(new Label("Цена:"), 0, 2);
+        grid.add(new Label(App.bundle.getString("receipt.item.field.price")), 0, 2);
         grid.add(priceField, 1, 2);
-        grid.add(new Label("Ячейка:"), 0, 3);
+        grid.add(new Label(App.bundle.getString("receipt.item.field.cell")), 0, 3);
         grid.add(cellCombo, 1, 3);
 
         dialog.getDialogPane().setContent(grid);
