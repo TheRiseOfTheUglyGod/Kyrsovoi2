@@ -8,8 +8,10 @@ import org.junit.jupiter.api.*;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,8 +20,9 @@ public class WarehouseAppTest extends ApplicationTest {
     private static final String VALID_USER = "manager";
     private static final String VALID_PASSWORD = "manager";
 
-    private static final int SHORT_PAUSE = 600;
-    private static final int MEDIUM_PAUSE = 1200;
+    private static final int SHORT_PAUSE = 800;
+    private static final int MEDIUM_PAUSE = 1500;
+    private static final int LONG_PAUSE = 2000;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -51,9 +54,21 @@ public class WarehouseAppTest extends ApplicationTest {
 
         clickOn("Добавить");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup(".text-field").tryQuery().isPresent());
+                () -> lookup("Название:").tryQuery().isPresent());
 
-        clickOn(".text-field").write("ТестТовар,ART-TEST,шт,описание,5");
+        List<TextField> textFields = lookup(".dialog-pane .text-field").queryAll()
+                .stream()
+                .filter(node -> node instanceof TextField)
+                .map(node -> (TextField) node)
+                .collect(Collectors.toList());
+        assertThat(textFields).hasSize(5);
+
+        clickOn(textFields.get(0)).write("Тестовый товар");
+        clickOn(textFields.get(1)).write("ART-TEST");
+        clickOn(textFields.get(2)).write("шт");
+        clickOn(textFields.get(3)).write("Тестовое описание");
+        clickOn(textFields.get(4)).write("5");
+
         clickOn("OK");
         sleep(MEDIUM_PAUSE);
 
@@ -62,7 +77,6 @@ public class WarehouseAppTest extends ApplicationTest {
                 .anyMatch(item -> item.toString().contains("ART-TEST"));
         assertThat(found).isTrue();
 
-        // Удаляем тестовый товар
         selectTableRowBySubstring(tableView, "ART-TEST");
         clickOn("Удалить");
         sleep(SHORT_PAUSE);
@@ -77,7 +91,6 @@ public class WarehouseAppTest extends ApplicationTest {
                 () -> lookup("#supplierCombo").tryQuery().isPresent());
         sleep(SHORT_PAUSE);
 
-        // Выбираем первого поставщика
         clickOn("#supplierCombo");
         sleep(SHORT_PAUSE);
         type(KeyCode.DOWN);
@@ -86,8 +99,34 @@ public class WarehouseAppTest extends ApplicationTest {
 
         clickOn("Добавить позицию");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup(".text-field").tryQuery().isPresent());
-        clickOn(".text-field").write("1,10,100.00,1");
+                () -> lookup("Товар:").tryQuery().isPresent());
+
+        List<ComboBox> comboBoxes = lookup(".dialog-pane .combo-box").queryAll()
+                .stream()
+                .filter(node -> node instanceof ComboBox)
+                .map(node -> (ComboBox) node)
+                .collect(Collectors.toList());
+        assertThat(comboBoxes).hasSize(2);
+
+        clickOn(comboBoxes.get(0));
+        sleep(SHORT_PAUSE);
+        clickOn("Кирпич керамический (KIR-001)");
+        sleep(SHORT_PAUSE);
+
+        List<TextField> textFields = lookup(".dialog-pane .text-field").queryAll()
+                .stream()
+                .filter(node -> node instanceof TextField)
+                .map(node -> (TextField) node)
+                .collect(Collectors.toList());
+        assertThat(textFields).hasSizeGreaterThanOrEqualTo(2);
+        clickOn(textFields.get(0)).write("10");
+        clickOn(textFields.get(1)).write("100.00");
+
+        clickOn(comboBoxes.get(1));
+        sleep(SHORT_PAUSE);
+        clickOn("Зона A, ряд 1, стеллаж R1, ячейка 10");
+        sleep(SHORT_PAUSE);
+
         clickOn("OK");
         sleep(SHORT_PAUSE);
 
@@ -105,18 +144,33 @@ public class WarehouseAppTest extends ApplicationTest {
     // =============================================
 
     @Test
-    @DisplayName("3. Ошибка при неверном пароле")
-    void testFailedLogin() throws TimeoutException {
+    @DisplayName("3. Сохранение прихода без позиций вызывает ошибку")
+    void testSaveReceiptWithoutItems() throws TimeoutException {
+        loginAsValidUser();
+        clickOn("Операции").clickOn("Приход");
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
-                () -> lookup("#usernameField").tryQuery().isPresent());
-        clickOn("#usernameField").write("wrong");
-        clickOn("#passwordField").write("wrong");
-        clickOn("Войти");
+                () -> lookup("#supplierCombo").tryQuery().isPresent());
+        sleep(SHORT_PAUSE);
 
+        clickOn("#supplierCombo");
+        sleep(SHORT_PAUSE);
+        type(KeyCode.DOWN);
+        type(KeyCode.ENTER);
+        sleep(SHORT_PAUSE);
+
+        // Не добавляем позиции — сразу сохраняем
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
+                () -> lookup("Сохранить приход").tryQuery().isPresent());
+        clickOn("Сохранить приход");
+
+        // Ждём появления алерта
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
                 () -> lookup(".alert").tryQuery().isPresent());
+        sleep(LONG_PAUSE);   // дополнительная пауза, чтобы рассмотреть сообщение
         DialogPane alert = lookup(".alert").query();
-        assertThat(alert.getContentText()).contains("Неверный логин или пароль");
+        String content = alert.getContentText();
+        assertThat(content).contains("Заполните все поля");
+        sleep(LONG_PAUSE);   // пауза перед закрытием, чтобы успеть прочитать
         clickOn("OK");
     }
 
@@ -132,8 +186,10 @@ public class WarehouseAppTest extends ApplicationTest {
 
         WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS,
                 () -> lookup(".alert").tryQuery().isPresent());
+        sleep(LONG_PAUSE);   // пауза, чтобы увидеть предупреждение
         DialogPane alert = lookup(".alert").query();
         assertThat(alert.getContentText()).contains("Выберите товар");
+        sleep(LONG_PAUSE);   // пауза перед закрытием
         clickOn("OK");
     }
 
