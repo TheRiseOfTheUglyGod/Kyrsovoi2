@@ -8,6 +8,7 @@ import ru.kafpin.lb7.App;
 import ru.kafpin.lb7.dao.*;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class MainController {
 
@@ -79,5 +80,21 @@ public class MainController {
             statusLabel.setText("Ошибка загрузки формы");
             e.printStackTrace();
         }
+    }
+
+    // ======== Методы переключения языка =========
+    @FXML
+    private void switchToRussian() {
+        App.switchLanguage(new Locale("ru", "RU"));
+    }
+
+    @FXML
+    private void switchToEnglish() {
+        App.switchLanguage(new Locale("en", "US"));
+    }
+
+    @FXML
+    private void switchToGerman() {
+        App.switchLanguage(new Locale("de", "DE"));
     }
 }

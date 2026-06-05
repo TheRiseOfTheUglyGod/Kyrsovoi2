@@ -17,6 +17,11 @@
                 <MenuItem text="%menu.suppliers" onAction="#handleSuppliers"/>
                 <MenuItem text="%menu.cells" onAction="#handleCells"/>
             </Menu>
+            <Menu text="%menu.language">
+                <MenuItem text="Русский" onAction="#switchToRussian"/>
+                <MenuItem text="English" onAction="#switchToEnglish"/>
+                <MenuItem text="Deutsch" onAction="#switchToGerman"/>
+            </Menu>
         </MenuBar>
     </top>
     <center>

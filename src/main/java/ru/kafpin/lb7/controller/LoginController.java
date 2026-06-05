@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kafpin.lb7.App;
 import ru.kafpin.lb7.auth.AuthManager;
-import ru.kafpin.lb7.dao.*;
-import ru.kafpin.lb7.dao.impl.*;
 
 public class LoginController {
 
@@ -40,18 +38,14 @@ public class LoginController {
 
         if (AuthManager.authenticate(username, password)) {
             logger.info("Аутентификация успешна, открывается главное окно");
-            ProductDao productDao = new ProductDaoImpl();
-            SupplierDao supplierDao = new SupplierDaoImpl();
-            StorageCellDao storageCellDao = new StorageCellDaoImpl();
-            StockDao stockDao = new StockDaoImpl();
-            ReceiptDao receiptDao = new ReceiptDaoImpl();
-            ShipmentDao shipmentDao = new ShipmentDaoImpl();
-            InventoryDao inventoryDao = new InventoryDaoImpl();
-
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main.fxml"), App.bundle);
-                MainController mainController = new MainController(productDao, supplierDao,
-                        storageCellDao, stockDao, receiptDao, shipmentDao, inventoryDao);
+                MainController mainController = new MainController(
+                        App.getProductDao(), App.getSupplierDao(),
+                        App.getStorageCellDao(), App.getStockDao(),
+                        App.getReceiptDao(), App.getShipmentDao(),
+                        App.getInventoryDao()
+                );
                 loader.setController(mainController);
                 stage.setScene(new Scene(loader.load()));
                 stage.setTitle(App.bundle.getString("app.title"));
