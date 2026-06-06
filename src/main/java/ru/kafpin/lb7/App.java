@@ -17,7 +17,6 @@ public class App extends Application {
     public static ResourceBundle bundle;
     private static Stage primaryStage;
 
-    // DAO создаются один раз, чтобы не было утечек соединений при переключении языка
     private static final ProductDao productDao = new ProductDaoImpl();
     private static final SupplierDao supplierDao = new SupplierDaoImpl();
     private static final StorageCellDao storageCellDao = new StorageCellDaoImpl();
@@ -29,7 +28,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         App.primaryStage = primaryStage;
-        // Устанавливаем локаль по умолчанию (русский)
+        // Устанавливаем локаль по умолчанию русский
         Locale.setDefault(new Locale("ru", "RU"));
         bundle = ResourceBundle.getBundle("messages", Locale.getDefault());
 
